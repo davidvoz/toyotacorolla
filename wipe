@@ -1,0 +1,91 @@
+#!/bin/bash
+# call the script then follow with a directory path
+# extends shred to be able to run through a directory with many sub directories
+
+display_entropy() {
+	echo "Entropy available: $(cat /proc/sys/kernel/random/entropy_avail)"
+	echo "Entropy pool size: $(cat /proc/sys/kernel/random/poolsize)"
+	echo "Wakeup threshold: $(cat /proc/sys/kernel/random/write_wakeup_threshold)"
+	echo "Minimum reseeding in seconds: $(cat /proc/sys/kernel/random/urandom_min_reseed_secs)"
+}
+
+random_string() {
+	tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1
+}
+
+secure_wipe() {
+	local target="$1"
+	
+	if [ -z "$target" ]; then
+		echo "No target specified for secure wipe."
+		exit 1
+	fi
+
+	if [ ! -e "$target" ]; then
+		echo "The specified file or directory does not exist."
+		exit 1
+	fi
+
+	folder_size=$(du -s "$target" | awk '{print $1}')
+	count_size=$((folder_size + 100)) # just a bit extra for remnants 
+
+	sudo find "$target" -type f -exec shred -vn4 -u {} +
+	sudo find "$target" -type d -exec rm -rf {} +
+	sudo dd if=/dev/urandom of=file bs=1024 count=$count_size
+	new_file_name=$(random_string 4)
+	sudo mv file "$new_file_name"
+	sudo rm -f "$new_file_name"
+}
+
+if [ $# -eq 0 ]; then
+	echo "wipe: missing file operand"
+	exit 1
+fi
+
+secure_wipe_option=0
+
+while [[ "$1" =~ ^- ]]; do
+	case "$1" in
+		-s|--secure)
+			secure_wipe_option=1
+			shift
+			;;
+		# add more later if need be
+		*)
+			echo "Invalid option: $1"
+			exit 1
+			;;
+	esac
+done
+
+target="$1"
+
+if [ ! -e "$target" ]; then
+	echo "The specified file or directory does not exist."
+	exit 1
+fi
+
+display_entropy
+
+if [ $secure_wipe_option -eq 1 ]; then
+	secure_wipe "$target"
+	exit 0
+fi
+
+full_path=$(readlink -f "$target")
+read -p "Delete $full_path/*? (y/n): " answer
+
+answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+
+if [ "$answer" != "y" ]; then
+	echo "Wiping deletion aborted."
+	exit 1
+fi
+
+if [ -d "$target" ]; then
+	find "$target" -type f -exec shred -vn1 -u {} + && find "$target" -type d -exec rm -rf {} +
+fi
+
+rm -rf "$target"
+
+echo "Deletion completed."
