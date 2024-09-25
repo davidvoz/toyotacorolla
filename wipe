@@ -1,31 +1,31 @@
 #!/bin/bash
 
 display_entropy() {
-    echo "Entropy available: $(cat /proc/sys/kernel/random/entropy_avail)"
-    echo "Entropy pool size: $(cat /proc/sys/kernel/random/poolsize)"
-    echo "Wakeup threshold: $(cat /proc/sys/kernel/random/write_wakeup_threshold)"
-    echo "Minimum reseeding in seconds: $(cat /proc/sys/kernel/random/urandom_min_reseed_secs)"
+	echo "Entropy available: $(cat /proc/sys/kernel/random/entropy_avail)"
+	echo "Entropy pool size: $(cat /proc/sys/kernel/random/poolsize)"
+	echo "Wakeup threshold: $(cat /proc/sys/kernel/random/write_wakeup_threshold)"
+	echo "Minimum reseeding in seconds: $(cat /proc/sys/kernel/random/urandom_min_reseed_secs)"
 }
 
 random_string() {
-    tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1
+	tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1
 }
 
 secure_wipe() {
-    local target="$1"
-    
-    if [ -z "$target" ]; then
-        echo "No target specified for secure wipe."
-        exit 1
-    fi
+	local target="$1"
+	
+	if [ -z "$target" ]; then
+		echo "No target specified for secure wipe."
+		exit 1
+	fi
 
-    if [ ! -e "$target" ]; then
-        echo "The specified file or directory does not exist."
-        exit 1
-    fi
+	if [ ! -e "$target" ]; then
+		echo "The specified file or directory does not exist."
+		exit 1
+	fi
 
-    folder_size=$(du -s "$target" | awk '{print $1}')
-    count_size=$((folder_size + 100)) # just a bit extra for remnants 
+	folder_size=$(du -s "$target" | awk '{print $1}')
+	count_size=$((folder_size + 100)) # just a bit extra for remnants 
 
 	sudo find "$target" -type f -exec shred -vn4 -u {} +
 	sudo find "$target" -type d -exec rm -rf {} +
@@ -37,8 +37,8 @@ secure_wipe() {
 
 # Check if no arguments are provided
 if [ $# -eq 0 ]; then
-    echo "wipe: missing file operand"
-    exit 1
+	echo "wipe: missing file operand"
+	exit 1
 fi
 
 # Initialize variables for options
@@ -46,31 +46,31 @@ secure_wipe_option=0
 
 # Parse options
 while [[ "$1" =~ ^- ]]; do
-    case "$1" in
-        -s)
-            secure_wipe_option=1
-            shift
-            ;;
+	case "$1" in
+		-s)
+			secure_wipe_option=1
+			shift
+			;;
 		# add more later if need be
-        *)
-            echo "Invalid option: $1"
-            exit 1
-            ;;
-    esac
+		*)
+			echo "Invalid option: $1"
+			exit 1
+			;;
+	esac
 done
 
 target="$1"
 
 if [ ! -e "$target" ]; then
-    echo "The specified file or directory does not exist."
-    exit 1
+	echo "The specified file or directory does not exist."
+	exit 1
 fi
 
 display_entropy
 
 if [ $secure_wipe_option -eq 1 ]; then
-    secure_wipe "$target"
-    exit 0
+	secure_wipe "$target"
+	exit 0
 fi
 
 full_path=$(readlink -f "$target")
@@ -79,12 +79,12 @@ read -p "Delete $full_path/*? (y/n): " answer
 answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
 
 if [ "$answer" != "y" ]; then
-    echo "Wiping deletion aborted."
-    exit 1
+	echo "Wiping deletion aborted."
+	exit 1
 fi
 
 if [ -d "$target" ]; then
-    find "$target" -type f -exec shred -vn1 -u {} + && find "$target" -type d -exec rm -rf {} +
+	find "$target" -type f -exec shred -vn1 -u {} + && find "$target" -type d -exec rm -rf {} +
 fi
 
 rm -rf "$target"
