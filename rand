@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+generate_string_azAZ09Symb() {
+	local length=$1
+	< /dev/urandom tr -dc 'A-Za-z0-9`~!@# $%^&*()-_=+[]{}|;:,.<>?/ ' | head -c "$length"
+}
+
+generate_string_azAZ09() {
+	local length=$1
+	< /dev/urandom tr -dc 'A-Za-z0-9' | head -c "$length"
+}
+
+print_help() {
+	echo "Usage: rand [OPTION]... [LENGTH]... [FILE]..."
+	echo "-n, --name [INT LENGTH] [FILE]	renames a file with a random name"
+	echo "-c, --clip [INT LENGTH]			copies a random string of specified length to clipboard"
+	echo "-h, --help						display this help message"
+}
+
+clip() {
+	echo "$(generate_string_azAZ09Symb)"
+}
+
+name(){
+	local length=$1
+	local file=$2
+	
+	if [[ -z "$file" || ! -f "$file" ]]; then
+		echo "File not found or not provided."
+		exit 1
+	fi
+	
+	random_name=$(generate_string_azAZ09 "$length")
+	mv "$file" "$random_name"
+	echo "Renamed '$file' to '$random_name'"
+}
+
+naming_option=0
+clip_option=0
+num_chars=0
+target_file=""
+
+while [[ "$1" =~ ^- ]]; do
+	case "$1" in
+		-n|--name) 
+			naming_option=1
+			shift
+			if [[ -n "$1" && "$1" =~ ^[0-9]+$ ]]; then
+				num_chars=$1
+				shift
+				if [[ -n "$1" ]]; then
+					target_file=$1
+					shift
+				else
+					echo "No file specified for renaming."
+					exit 1
+				fi
+			else
+				echo "Invalid or missing length for -n option."
+				print_help
+				exit 1
+			fi
+			;;
+		-c|--clip)
+			clip_option=1
+			shift
+			if [[ -n "$1" && "$1" =~ ^[0-9]+$ ]]; then
+				num_chars=$1
+				shift
+			else
+				echo "Invalid or missing argument for -c option."
+				print_help
+				exit 1
+			fi
+			;;
+		-h|--help)
+			print_help
+			exit 0
+			;;
+		*)
+			echo "Invalid option: $1"
+			exit 1
+			;;
+	esac
+done
+
+if [ $naming_option -eq 1 ]; then
+	if [[ -n "$num_chars" && -n "$target_file" ]]; then
+		name "$num_chars" "$target_file"
+		exit 0
+	else
+		echo "Missing length or file for renaming."
+		print_help
+		exit 1
+	fi
+elif [ $clip_option -eq 1 ]; then
+	if [[ -n "$num_chars" ]]; then
+		random_string=$(generate_string_azAZ09Symb "$num_chars")
+		echo "$random_string" | xclip -selection clipboard
+		echo "copied to clipboard"
+		exit 0
+	else 
+		print_help
+		exit 1
+	fi
+fi
+
+if [[ $# -gt 0 && "$1" =~ ^[0-9]+$ ]]; then
+	num_chars=$1
+	random_string=$(generate_string_azAZ09Symb "$num_chars")
+	echo "$random_string"
+	exit 0
+fi
+
+print_help
+exit 1
