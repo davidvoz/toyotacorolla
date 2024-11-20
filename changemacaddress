@@ -1,0 +1,7 @@
+#!/bin/bash
+# changes a mac address
+# simply call the script
+
+sudo ip link set dev wlp1s0 down
+sudo macchanger -r wlp1s0
+sudo ip link set dev wlp1s0 up

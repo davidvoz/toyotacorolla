@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "Usage: $0 /path/to/directory"
+	exit 1
+fi
+
+target_dir="$1"
+
+if [ ! -d "$target_dir" ]; then
+	echo "Error: '$target_dir' is not a valid directory."
+	exit 1
+fi
+
+for file in "$target_dir"/*; do
+	[ -d "$file" ] && continue
+	mime_type=$(file --mime-type -b "$file")
+	extension=$(echo "$mime_type" | awk -F'/' '{print $2}')
+
+	if [[ ! "$file" == *".$extension" && -n "$extension" ]]; then
+	new_file="$file.$extension"
+	echo "$file -> $new_file"
+		mv "$file" "$new_file"
+	fi
+done

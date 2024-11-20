@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Get the current keyboard layout
+layout=$(setxkbmap -query | grep layout | awk '{print $2}')
+
+if [ $layout == "ru" ]; then
+	setxkbmap -layout us -variant colemak
+	herbe "current layout: colemak"
+	exit 0
+elif [ $layout == "us" ]; then
+	setxkbmap -layout ru
+	herbe "current layout: russian"
+	exit 0
+else
+	setxkbmap -layout us -variant colemak
+	exit 1
+fi
