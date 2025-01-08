@@ -1,4 +1,5 @@
 #!/bin/bash
 filename="${1%.tex}"
 
-xelatex "${filename}.tex" && rm -f "${filename}".log "${filename}".aux "${filename}".out "${filename}".toc
+xelatex "${filename}.tex"
+rm -f "${filename}".log "${filename}".aux "${filename}".out "${filename}".toc
