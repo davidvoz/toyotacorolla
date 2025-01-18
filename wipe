@@ -84,7 +84,7 @@ if [ "$answer" != "y" ]; then
 fi
 
 if [ -d "$target" ]; then
-	find "$target" -type f -exec shred -vn1 -u {} + && find "$target" -type d -exec rm -rf {} +
+	find "$target" -type f -exec shred -vn3 -u {} + && find "$target" -type d -exec rm -rf {} +
 fi
 
 rm -rf "$target"
