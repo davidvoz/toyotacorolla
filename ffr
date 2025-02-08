@@ -1,0 +1,24 @@
+#!/bin/bash
+
+NOTES_FILE="$HOME/.config/ffr"
+
+if [[ -z $1 ]]; then
+	awk '
+		/^\!\[/ {exit}
+		{print}
+	' "$NOTES_FILE"
+else
+	awk -v topic="![$1]" '
+		$0 == topic {found=1; next}
+		/^\!\[/ && found {exit}
+		found {print}
+	' "$NOTES_FILE"
+fi
+
+# example below of an ~/.config/ffr file, pound signs need to be removed
+
+# ffmpeg -i input.webm -vn -q:a 0 -f mp3 output.mp3
+#   :  this command will print out when command is ran without arguments
+# ![tar]
+# tar -czvf archive.tar.gz thing/ file
+#   :  this note will only be printed when 'ffr tar' is ran
