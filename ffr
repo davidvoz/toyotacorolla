@@ -2,23 +2,21 @@
 
 NOTES_FILE="$HOME/.config/ffr"
 
-if [[ -z $1 ]]; then
+if [ -z $1 ]; then
 	awk '
-		/^\!\[/ {exit}
-		{print}
+		/^\#/ {exit} {print}
 	' "$NOTES_FILE"
 else
-	awk -v topic="![$1]" '
-		$0 == topic {found=1; next}
-		/^\!\[/ && found {exit}
-		found {print}
+	awk -v topic="$1" '
+		/^#\[/{in_block=index(tolower($0), tolower(topic))} in_block &&
+		!/^#/{print $0}
 	' "$NOTES_FILE"
 fi
 
-# example below of an ~/.config/ffr file, pound signs need to be removed
+# example below of an ~/.config/ffr file, pound signs followed by a space need to be removed
 
-# ffmpeg -i input.webm -vn -q:a 0 -f mp3 output.mp3
-#   :  this command will print out when command is ran without arguments
-# ![tar]
 # tar -czvf archive.tar.gz thing/ file
-#   :  this note will only be printed when 'ffr tar' is ran
+#   :  this command will print out when 'ffr' is ran without arguments
+# #[ffmpeg][ffm][peg]#
+# ffmpeg -i input.webm -vn -q:a 0 -f mp3 output.mp3
+#   :  this command is printed when 'ffr ffmpeg', 'ffr ffm', or 'ffr peg' is ran
