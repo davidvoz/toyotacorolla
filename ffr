@@ -17,6 +17,6 @@ fi
 
 # tar -czvf archive.tar.gz thing/ file
 #   :  this command will print out when 'ffr' is ran without arguments
-# #[ffmpeg][ffm][peg]#
+# #[ffmpeg]#
 # ffmpeg -i input.webm -vn -q:a 0 -f mp3 output.mp3
 #   :  this command is printed when 'ffr ffmpeg', 'ffr ffm', or 'ffr peg' is ran
