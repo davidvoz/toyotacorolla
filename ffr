@@ -1,22 +1,22 @@
 #!/bin/bash
+CONFIG_FILE="$HOME/.config/ffr"
 
-NOTES_FILE="$HOME/.config/ffr"
-
-if [ -z $1 ]; then
-	awk '
-		/^\#/ {exit} {print}
-	' "$NOTES_FILE"
+if [ $# -eq 0 ]; then
+    sed '/^#>/Q' "$CONFIG_FILE"
 else
-	awk -v topic="$1" '
-		/^#\[/{in_block=index(tolower($0), tolower(topic))} in_block &&
-		!/^#/{print $0}
-	' "$NOTES_FILE"
+    section="$1"
+    awk -v section="$section" '
+		/^#>/ &&
+		section_notes { section_notes = 0 } /^#>/ &&
+		(" " $0 " " ~ " #>" section " ") { section_notes = 1; next } 
+		section_notes { print }
+	' "$CONFIG_FILE"
 fi
 
 # example below of an ~/.config/ffr file, pound signs followed by a space need to be removed
 
 # tar -czvf archive.tar.gz thing/ file
 #   :  this command will print out when 'ffr' is ran without arguments
-# #[ffmpeg]#
-# ffmpeg -i input.webm -vn -q:a 0 -f mp3 output.mp3
-#   :  this command is printed when 'ffr ffmpeg', 'ffr ffm', or 'ffr peg' is ran
+# #>ffmpeg #>ffm #>peg
+# this line is printed when 'ffr ffmpeg', 'ffr ffm', or 'ffr peg' is ran
+#   :  additional notes
