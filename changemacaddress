@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # changes a mac address
 # simply call the script
 

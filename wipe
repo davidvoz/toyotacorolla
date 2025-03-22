@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 display_entropy() {
 	echo "Entropy available: $(cat /proc/sys/kernel/random/entropy_avail)"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Get the current keyboard layout
 layout=$(setxkbmap -query | grep layout | awk '{print $2}')
