@@ -1,6 +1,5 @@
 #!/bin/sh
-# GPL3 license does not apply to this file
-# This is a modified version of SwindlesMcCoop program
+# This is a modified version of swindlesmccoop's note program
 
 NOTES_FILE=$HOME/misc/notes
 
