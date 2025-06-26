@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -e
+
+sudo -v ||  exit 1
+
+mapped_devices=""
+for path in /dev/mapper/usb*; do
+	[ -e "$path" ] || continue
+	mapped_devices="$mapped_devices $(basename "$path")"
+done
+
+set -- $mapped_devices
+
+[ "$#" -eq 0 ] && exit 1
+
+echo "Devices Found"
+i=1
+for dev in "$@"; do
+	echo "[$i] /dev/mapper/$dev"
+	i=$((i + 1))
+done
+
+if [ $i -eq 2 ]; then
+	index=1
+else
+	printf "select a device to unmount [1-%d]: " $(( $# ))
+	read index
+
+	case "$index" in
+		''|*[!1-9]*)
+			exit 1
+		;;
+	esac
+
+	if [ "$index" -lt 1 ] || [ "$index" -ge "$#" ]; then
+		exit 1
+	fi
+fi
+
+i=1
+for dev in "$@"; do
+	[ "$i" -eq "$index" ] && name="$dev" && break
+	i=$((i + 1))
+done
+
+mount_point="/mnt/$name"
+
+if mountpoint -q "$mount_point" 2>/dev/null; then
+	echo "umounting $mount_point"
+	sudo umount "$mount_point"
+fi
+
+echo "cryptsetup closing $name"
+sudo cryptsetup close "$name"
+
+echo "/dev/mapper/$name unmounted successfully"

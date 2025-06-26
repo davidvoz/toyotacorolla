@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -e
+
+sudo -v || exit 1
+
+i=1
+devices=""
+echo "Devices Found"
+while read -r dev; do
+	if sudo cryptsetup isLuks "/dev/$dev" 2>/dev/null; then
+		echo "[$i] /dev/$dev"
+		devices="$devices /dev/$dev"
+		i=$((i + 1))
+	fi
+done <<EOF
+$(lsblk -do NAME)
+EOF
+
+[ "$i" -eq 1 ] && exit 1
+
+set -- $devices
+
+if [ "$i" -eq 2 ]; then
+	chosen_index=1
+else
+	printf "select a device to unlock [1-%d]: " $((i - 1))
+	read chosen_index
+fi
+
+n=1
+for dev in "$@"; do
+	if [ "$n" -eq "$chosen_index" ]; then
+		chosen="$dev"
+		break
+	fi
+	n=$((n + 1))
+done
+
+[ -z "$chosen" ] && exit 1
+
+default_name="usb$chosen_index"
+printf "name to assign to unlocked device [%s]: " "$default_name"
+read name
+[ -z "$name" ] && name="$default_name"
+
+echo "cryptsetup opening $chosen as $name"
+sudo cryptsetup open "$chosen" "$name" || exit 1
+
+mount_point="/mnt/$name"
+sudo mkdir -p "$mount_point"
+echo "mounting $name"
+sudo mount "/dev/mapper/$name" "$mount_point" || exit 1
+
+echo "$chosen mounted successfully at $mount_point"
