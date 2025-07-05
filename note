@@ -8,8 +8,11 @@ if [ "$1" = "-p" ]; then
   exit 0
 fi
 
-nvim /tmp/note_temp
-echo "[$(date)]" >> "$NOTES_FILE"
-cat /tmp/note_temp >> "$NOTES_FILE"
-echo "" >> "$NOTES_FILE"
-rm /tmp/note_temp
+nvim +startinsert /tmp/note_temp
+
+if [ -s /tmp/note_temp ]; then
+	echo "[$(date)]" >> "$NOTES_FILE"
+	cat /tmp/note_temp >> "$NOTES_FILE"
+	echo "" >> "$NOTES_FILE"
+	rm /tmp/note_temp
+fi
