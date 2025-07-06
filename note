@@ -10,7 +10,7 @@ if [ "$1" = "-p" ]; then
 fi
 
 # enter note without editor
-if [ "$#" -eq 1 ]; then
+if [ "$#" -ge 1 ]; then
 	echo "[$(date)]" >> "$NOTES_FILE"
 	echo "$@" >> "$NOTES_FILE"
 	echo "" >> "$NOTES_FILE"
