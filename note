@@ -4,7 +4,7 @@
 NOTES_FILE=$HOME/misc/notes
 
 # print option
-if [ "$1" = "-p" ]; then
+if [ "$*" = "-p" ]; then
 	cat "$NOTES_FILE"
 	exit 0
 fi
@@ -12,7 +12,7 @@ fi
 # enter note without editor
 if [ "$#" -ge 1 ]; then
 	echo "[$(date)]" >> "$NOTES_FILE"
-	echo "$@" >> "$NOTES_FILE"
+	echo "$*" >> "$NOTES_FILE"
 	echo "" >> "$NOTES_FILE"
 	exit 0
 fi
