@@ -1,0 +1,9 @@
+#!/bin/sh
+
+curl -s 'https://forecast.weather.gov/meteograms/Plotter.php?' > /tmp/weather_chart # fill in the rest with your address
+
+nsxiv -z 156 -b /tmp/weather_chart & sleep 0.1
+xdotool search --onlyvisible --class nsxiv windowactivate --sync key f
+wait
+rm /tmp/weather_chart
+exit 0
